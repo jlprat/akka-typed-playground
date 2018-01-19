@@ -1,0 +1,10 @@
+.idea
+.iml
+
+.ensime
+.ensime_cache
+
+#*#
+
+target
+*.class
