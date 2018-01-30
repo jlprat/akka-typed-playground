@@ -13,7 +13,7 @@ object Maitre {
   case class OpenRestaurant(numberOfTables: Int) extends Command
   case object Foo
 
-  def behavior: Behavior[Command] = init()
+  val behavior: Behavior[Command] = init
 
   def onDuty(availableTables: Seq[ActorRef[Table.Action]]): Behavior[Command] =
     Actor.immutable[Command] { (ctx, msg) =>
@@ -32,7 +32,7 @@ object Maitre {
       }
     }
 
-  def init(): Behavior[Command] = Actor.immutable[Command] { (ctx, msg) =>
+  val init: Behavior[Command] = Actor.immutable[Command] { (ctx, msg) =>
       msg match {
         case OpenRestaurant(numberOfTables) if numberOfTables > 0 =>
           val tables = 0.until(numberOfTables).map { i =>

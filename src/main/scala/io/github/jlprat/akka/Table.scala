@@ -8,7 +8,7 @@ object Table {
   sealed trait Action
   case object Occupied extends Action
 
-  def initial: Behavior[Action] = Actor.immutable[Action] { (ctx, msg) =>
+  val initial: Behavior[Action] = Actor.immutable[Action] { (ctx, msg) =>
     msg match {
       case _ =>
         Actor.empty
