@@ -17,13 +17,13 @@ object Ship {
     case object Placed extends CommandReaction
 
 
-    def isFitting(size: Int, begin: Coordinate, end: Coordinate): Boolean = (begin,end) match {
+    private def isFitting(size: Int, begin: Coordinate, end: Coordinate): Boolean = (begin,end) match {
         case (Coordinate(x1, y1), Coordinate(x2, y2)) if x1 == x2 => Math.max(y1, y2) - Math.min(y1, y2) == size -1
         case (Coordinate(x1, y1), Coordinate(x2, y2)) if y1 == y2 => Math.max(x1, x2) - Math.min(x1, x2) == size -1
         case _ => false
     }
 
-    def shipCoordinates(size: Int, begin: Coordinate, end: Coordinate): Seq[Coordinate] = (begin,end) match {
+    private def shipCoordinates(size: Int, begin: Coordinate, end: Coordinate): Seq[Coordinate] = (begin,end) match {
             case (Coordinate(x1, y1), Coordinate(x2, y2)) if x1 == x2 => 
                 for {
                     y <- Math.min(y1, y2) to Math.max(y1, y2)
