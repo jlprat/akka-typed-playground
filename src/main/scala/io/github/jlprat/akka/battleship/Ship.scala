@@ -23,7 +23,7 @@ object Ship {
         case _ => false
     }
 
-    private def shipCoordinates(size: Int, begin: Coordinate, end: Coordinate): Seq[Coordinate] = (begin,end) match {
+    private def expandCoordinates(begin: Coordinate, end: Coordinate): Seq[Coordinate] = (begin,end) match {
             case (Coordinate(x1, y1), Coordinate(x2, y2)) if x1 == x2 => 
                 for {
                     y <- Math.min(y1, y2) to Math.max(y1, y2)
@@ -41,7 +41,7 @@ object Ship {
             case Place(begin, end, handler) if isFitting(size, begin, end) => 
                 context.log.info("Placed Ship {} - {}", begin.show, end.show)
                 handler ! Placed
-                placedShip(shipCoordinates(size, begin, end))
+                placedShip(expandCoordinates(begin, end))
             case Place(begin, end, handler) =>
                 context.log.info("Ship of size {} can't be placed in {} - {}", size, begin.show, end.show)
                 handler ! NotFit

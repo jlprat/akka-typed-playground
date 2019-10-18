@@ -1,6 +1,5 @@
 package io.github.jlprat.akka.battleship
 
-import akka.actor.testkit.typed.Effect.Spawned
 import akka.actor.testkit.typed.scaladsl.BehaviorTestKit
 import akka.actor.testkit.typed.CapturedLogEvent
 import akka.actor.typed.Behavior
