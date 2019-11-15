@@ -19,7 +19,7 @@ object BoardBehavior {
     }
 }
 
-class BoardBehavior(context: ActorContext[BoardBehavior.Take], width: Int, height: Int) extends AbstractBehavior[BoardBehavior.Take] {
+class BoardBehavior(context: ActorContext[BoardBehavior.Take], width: Int, height: Int) extends AbstractBehavior[BoardBehavior.Take](context) {
     
     var board = Board(Seq.fill(width, height)(Board.Free))
 

@@ -72,11 +72,11 @@ object Ship {
             case Shoot(coord, handler) if hit.contains(coord) =>
                 context.log.info("Ship already shot at {}", coord.show)
                 handler ! Hit
-                Behavior.same
+                Behaviors.same
             case Shoot(_, handler) =>
                 context.log.info("Miss!")
                 handler ! Miss
-                Behavior.same
+                Behaviors.same
         }
     }
 
@@ -90,11 +90,11 @@ object Ship {
             case Shoot(coord, handler) if hit.contains(coord) =>
                 context.log.info("Ship already sunk at {}", coord.show)
                 handler ! Sunk
-                Behavior.same
+                Behaviors.same
             case Shoot(_, handler) =>
                 context.log.info("Miss!")
                 handler ! Miss
-                Behavior.same
+                Behaviors.same
         }
     }
 }

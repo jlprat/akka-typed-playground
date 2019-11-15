@@ -5,8 +5,7 @@ import akka.actor.testkit.typed.scaladsl.TestInbox
 import akka.actor.testkit.typed.scaladsl.BehaviorTestKit
 import akka.actor.typed.scaladsl.Behaviors
 import akka.actor.testkit.typed.CapturedLogEvent
-import akka.event.Logging
-
+import org.slf4j.event.Level
 
 class BoardBehaviorSpecs extends FlatSpec with Matchers {
 
@@ -19,7 +18,7 @@ class BoardBehaviorSpecs extends FlatSpec with Matchers {
         testKit.run(BoardBehavior.Take(coords, replyTo.ref))
 
         testKit.returnedBehavior shouldBe Behaviors.same
-        testKit.logEntries() shouldBe Seq(CapturedLogEvent(Logging.InfoLevel, "Up for takes (1,1),(1,2)"))
+        testKit.logEntries() shouldBe Seq(CapturedLogEvent(Level.INFO, "Up for takes (1,1),(1,2)"))
 
         replyTo.expectMessage(BoardBehavior.OK)
     }
@@ -37,6 +36,6 @@ class BoardBehaviorSpecs extends FlatSpec with Matchers {
         testKit.run(BoardBehavior.Take(coords, replyTo.ref))
         replyTo.expectMessage(BoardBehavior.KO)
 
-        testKit.logEntries() shouldBe Seq(CapturedLogEvent(Logging.InfoLevel, "Up for takes (1,1),(1,2)"), CapturedLogEvent(Logging.InfoLevel, "Already occupied"))
+        testKit.logEntries() shouldBe Seq(CapturedLogEvent(Level.INFO, "Up for takes (1,1),(1,2)"), CapturedLogEvent(Level.INFO, "Already occupied"))
     }
 }
