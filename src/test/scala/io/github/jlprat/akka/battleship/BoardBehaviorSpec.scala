@@ -23,19 +23,20 @@ class BoardBehaviorSpecs extends FlatSpec with Matchers {
 
     it should "fail to place a ship if any of the slots is already taken" in {
 
-        val boardBehavior = BoardBehavior(3, 3)
-        val testKit = BehaviorTestKit(boardBehavior)
+        val initialBoard = Board[ShipBehavior.Command](Seq.fill(3, 3)(None))
         val initialCoordinate = Coordinate(1, 1)
-        val replyTo = TestInbox[BoardBehavior.Protocol]()
+        val ship = TestInbox[ShipBehavior.Command]()
+        val newBoard = initialBoard.take(initialCoordinate, ship.ref)
 
-        testKit.run(BoardBehavior.PlaceShip(2, initialCoordinate, Coordinate.Right, replyTo.ref))
-        replyTo.expectMessage(BoardBehavior.OK)
-        testKit.expectEffectType[Effect.SpawnedAnonymous[_]]
+        val alreadyTakenPlacesBehavior = BoardBehavior.baseline(newBoard, 3)
+        val testKit = BehaviorTestKit(alreadyTakenPlacesBehavior)
+
+        val replyTo = TestInbox[BoardBehavior.Protocol]()
 
         testKit.run(BoardBehavior.PlaceShip(2, initialCoordinate, Coordinate.Right, replyTo.ref))
         testKit.returnedBehavior shouldBe Behaviors.same
         replyTo.expectMessage(BoardBehavior.KO)
     }
 
-    
+
 }
