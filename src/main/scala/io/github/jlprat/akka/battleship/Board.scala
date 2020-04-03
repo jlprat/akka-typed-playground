@@ -2,22 +2,20 @@ package io.github.jlprat.akka.battleship
 import akka.actor.typed.ActorRef
 
 
-object Board {
+object Board {     
 
-    sealed trait State[+T] 
-    case object Free extends State[Nothing]
-    case class Taken[T](ref: ActorRef[T]) extends State[T]
-      
-    def apply(width: Int, height: Int) = new Board(Seq.fill(width, height)(Free))
+    def apply[T](width: Int, height: Int) = new Board[T](Seq.fill(width, height)(None))
     
 }
 
-case class Board[T] private (inner: Seq[Seq[Board.State[T]]]) {
+case class Board[T] private (inner: Seq[Seq[Option[ActorRef[T]]]]) {
 
-    def apply(coordinate: Coordinate): Board.State[T] = inner(coordinate.x - 1)(coordinate.y - 1)
+    //TODO input validation
+    def apply(coordinate: Coordinate): Option[ActorRef[T]] = inner(coordinate.x - 1)(coordinate.y - 1)
 
+    //TODO input validation
     def take(coordinate: Coordinate, ref: ActorRef[T]): Board[T] = {
-        Board(inner.updated(coordinate.x - 1, inner(coordinate.x - 1).updated(coordinate.y - 1, Board.Taken(ref))))
+        Board(inner.updated(coordinate.x - 1, inner(coordinate.x - 1).updated(coordinate.y - 1, Some(ref))))
     }
 }
 

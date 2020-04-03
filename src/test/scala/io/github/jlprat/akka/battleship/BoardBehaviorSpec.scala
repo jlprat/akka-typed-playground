@@ -4,21 +4,19 @@ import org.scalatest.{FlatSpec, Matchers}
 import akka.actor.testkit.typed.scaladsl.TestInbox
 import akka.actor.testkit.typed.scaladsl.BehaviorTestKit
 import akka.actor.typed.scaladsl.Behaviors
-import akka.actor.testkit.typed.CapturedLogEvent
-import org.slf4j.event.Level
+import akka.actor.testkit.typed.Effect
 
 class BoardBehaviorSpecs extends FlatSpec with Matchers {
 
-    "BoardBehavior" should "take a sequence of free slots" in {
+    "BoardBehavior" should "accept placing ships" in {
         val boardBehavior = BoardBehavior(3, 3)
         val testKit = BehaviorTestKit(boardBehavior)
-        val coords = Seq(Coordinate(1, 1), Coordinate(1, 2))
-        val replyTo = TestInbox[BoardBehavior.BoardReply]()
+        val initialCoordinate = Coordinate(1, 1)
+        val replyTo = TestInbox[BoardBehavior.Protocol]()
 
-        testKit.run(BoardBehavior.Take(coords, replyTo.ref))
+        testKit.run(BoardBehavior.PlaceShip(2, initialCoordinate, Coordinate.Right, replyTo.ref))
 
-        testKit.returnedBehavior shouldBe Behaviors.same
-        testKit.logEntries() shouldBe Seq(CapturedLogEvent(Level.INFO, "Up for takes (1,1),(1,2)"))
+        testKit.expectEffectType[Effect.SpawnedAnonymous[_]]
 
         replyTo.expectMessage(BoardBehavior.OK)
     }
@@ -27,15 +25,17 @@ class BoardBehaviorSpecs extends FlatSpec with Matchers {
 
         val boardBehavior = BoardBehavior(3, 3)
         val testKit = BehaviorTestKit(boardBehavior)
-        val coords = Seq(Coordinate(1, 1), Coordinate(1, 2))
-        val replyTo = TestInbox[BoardBehavior.BoardReply]()
+        val initialCoordinate = Coordinate(1, 1)
+        val replyTo = TestInbox[BoardBehavior.Protocol]()
 
-        testKit.run(BoardBehavior.Take(coords, replyTo.ref))
+        testKit.run(BoardBehavior.PlaceShip(2, initialCoordinate, Coordinate.Right, replyTo.ref))
         replyTo.expectMessage(BoardBehavior.OK)
+        testKit.expectEffectType[Effect.SpawnedAnonymous[_]]
 
-        testKit.run(BoardBehavior.Take(coords, replyTo.ref))
+        testKit.run(BoardBehavior.PlaceShip(2, initialCoordinate, Coordinate.Right, replyTo.ref))
+        testKit.returnedBehavior shouldBe Behaviors.same
         replyTo.expectMessage(BoardBehavior.KO)
 
-        testKit.logEntries() shouldBe Seq(CapturedLogEvent(Level.INFO, "Up for takes (1,1),(1,2)"), CapturedLogEvent(Level.INFO, "Already occupied"))
+
     }
 }

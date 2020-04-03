@@ -6,7 +6,12 @@ import akka.actor.typed.{ ActorRef, Behavior }
 object ShipBehavior {
  
     sealed trait Command
-    case class Shoot(coordinate: Coordinate, handler: ActorRef[Protocol]) extends Command
+    case class Shoot(coordinate: Coordinate, handler: ActorRef[Response]) extends Command
+
+    sealed trait Response
+    case object Sunk extends Response
+    case object NotYet extends Response
+    case object Wrong extends Response
 
     // def init(begin: Coordinate, end: Coordinate): Behavior[ShipBehavior.Command] = placedShip(Coordinate.expandCoordinates(begin, end))
 
@@ -16,19 +21,19 @@ object ShipBehavior {
         message match {
             case Shoot(coord, handler) if aliveCoords.contains(coord) && aliveCoords.size ==1 =>
                 context.log.info("Ship shot and sunk at {}", coord.show)
-                handler ! Protocol.Sunk
+                handler ! Sunk
                 sunk(coord +: hit)
             case Shoot(coord, handler) if aliveCoords.contains(coord) =>
                 context.log.info("Ship shot at {}", coord.show)
-                handler ! Protocol.Hit
+                handler ! NotYet
                 placedShip(aliveCoords.filterNot( _ == coord), coord +: hit)
             case Shoot(coord, handler) if hit.contains(coord) =>
                 context.log.info("Ship already shot at {}", coord.show)
-                handler ! Protocol.Hit
+                handler ! NotYet
                 Behaviors.same
             case Shoot(_, handler) =>
                 context.log.info("Miss!")
-                handler ! Protocol.Miss
+                handler ! Wrong
                 Behaviors.same
         }
     }
@@ -38,11 +43,11 @@ object ShipBehavior {
         message match {
             case Shoot(coord, handler) if hit.contains(coord) =>
                 context.log.info("Ship already sunk at {}", coord.show)
-                handler ! Protocol.Sunk
+                handler ! Sunk
                 Behaviors.same
             case Shoot(_, handler) =>
                 context.log.info("Miss!")
-                handler ! Protocol.Miss
+                handler ! Wrong
                 Behaviors.same
         }
     }
