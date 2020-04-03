@@ -17,6 +17,7 @@ object BoardBehavior {
     case object Hit extends Protocol
     case object Miss extends Protocol
     case object Sunk extends Protocol
+    case object ShipsNotPlaced extends Protocol
 
     // Ship should reply messages readable for Board
     // private final case class WrappedShipResponse(response: Backend.Response) extends Command
@@ -24,10 +25,10 @@ object BoardBehavior {
     val totalShips = 17
 
     def apply(width: Int, height: Int): Behavior[BoardBehavior.BoardCommand] =
-        baseline(Board[ShipBehavior.Command](Seq.fill(width, height)(None)), totalShips)
+        baseline(Board[ShipBehavior.Command](Seq.fill(width, height)(None)), totalShips, Set.empty)
 
 
-    def baseline(board: Board[ShipBehavior.Command], shipsToPlace: Int): Behavior[BoardBehavior.BoardCommand] = Behaviors.receive {(context, message) => 
+    def baseline(board: Board[ShipBehavior.Command], shipsToPlace: Int, children: Set[ActorRef[ShipBehavior.Command]]): Behavior[BoardBehavior.BoardCommand] = Behaviors.receive {(context, message) => 
         message match {
             case PlaceShip(size, initCoord, direction, replyTo) => 
                 val endCoord = initCoord.move(direction, size)
@@ -39,9 +40,9 @@ object BoardBehavior {
                     replyTo ! OK
 
                     if (shipsToPlace == 1) {
-                        inGame(newBoard)
+                        inGame(newBoard, children + ship)
                     } else {
-                        baseline(newBoard, shipsToPlace - 1)
+                        baseline(newBoard, shipsToPlace - 1, children + ship)
                     }
                 }
                 else {
@@ -49,17 +50,19 @@ object BoardBehavior {
                     Behaviors.same
                 }
 
-            case _ => 
+            case Shoot(_, replyTo) => 
+                replyTo ! ShipsNotPlaced
                 context.log.info(s"Wrong message while in state `baseline`! $message")
                 Behaviors.same
         }
     }
 
-    def inGame(board: Board[ShipBehavior.Command]): Behavior[BoardBehavior.BoardCommand] = Behaviors.receive { (_, message) =>
+    def inGame(board: Board[ShipBehavior.Command], aliveShips: Set[ActorRef[ShipBehavior.Command]]): Behavior[BoardBehavior.BoardCommand] = Behaviors.receive { (_, message) =>
         message match {
             case Shoot(coord, replyTo) =>
                 board(coord)
                 replyTo.path
+                aliveShips.isEmpty
                 // val cell: Board.State[ShipBehavior.Command] = board(coord)
                 // cell match {
                 //     case Board.Taken(ref: ActorRef[ShipBehavior.Command]) =>
