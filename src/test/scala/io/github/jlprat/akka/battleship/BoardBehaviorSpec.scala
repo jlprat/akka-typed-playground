@@ -21,7 +21,7 @@ class BoardBehaviorSpecs extends FlatSpec with Matchers {
         replyTo.expectMessage(BoardBehavior.OK)
     }
 
-    it should "fail to take a sequence of slots if any of them is already taken" in {
+    it should "fail to place a ship if any of the slots is already taken" in {
 
         val boardBehavior = BoardBehavior(3, 3)
         val testKit = BehaviorTestKit(boardBehavior)
@@ -35,7 +35,7 @@ class BoardBehaviorSpecs extends FlatSpec with Matchers {
         testKit.run(BoardBehavior.PlaceShip(2, initialCoordinate, Coordinate.Right, replyTo.ref))
         testKit.returnedBehavior shouldBe Behaviors.same
         replyTo.expectMessage(BoardBehavior.KO)
-
-
     }
+
+    
 }
